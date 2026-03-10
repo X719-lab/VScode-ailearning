@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>颜文字生成器 · 无警告版</title>
+    <style>
+        /* 纯功能样式，无任何冗余 */
+        body {
+            background: #f5f5f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            font-family: system-ui, 'Segoe UI', Roboto, sans-serif;
+        }
+        .card {
+            background: white;
+            padding: 2rem 2rem 2.5rem;
+            border-radius: 28px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+            text-align: center;
+            max-width: 90%;
+            border: 1px solid #e0e0e0;
+        }
+        .emoji-display {
+            font-size: 4rem;
+            line-height: 1.4;
+            word-break: break-word;
+            min-height: 7rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.5rem 1.5rem;
+            background: #f0f0f0;
+            border-radius: 60px;
+            margin-bottom: 2rem;
+            border: 1px solid #d0d0d0;
+            font-weight: 400;
+        }
+        .button-row {
+            display: flex;
+            gap: 0.8rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        button {
+            background: #2b2b2b;
+            color: white;
+            border: none;
+            padding: 0.7rem 2rem;
+            font-size: 1.2rem;
+            border-radius: 40px;
+            cursor: pointer;
+            border: 1px solid #1a1a1a;
+            min-width: 130px;
+            transition: 0.1s;
+            font-weight: 450;
+        }
+        button:hover {
+            background: #3d3d3d;
+        }
+        button:active {
+            transform: scale(0.96);
+        }
+        .copy-btn {
+            background: white;
+            color: #2b2b2b;
+            border: 1px solid #b0b0b0;
+        }
+        .copy-btn:hover {
+            background: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div id="kaomojiDisplay" class="emoji-display">(????)</div>
+        <div class="button-row">
+            <button id="generateBtn">? 随机生成</button>
+            <button id="copyBtn" class="copy-btn">? 复制</button>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            'use strict';
+
+            // ---------- 预设经典颜文字 ----------
+            const PRESETS = [
+                '(????)',
+                '(???)',
+                '(￣▽￣)ノ',
+                '(?????)',
+                '( ?° ?? ?°)',
+                '(づ??????)づ',
+                '(???)',
+                '(＾▽＾)',
+                '( ? ▽ ` )b',
+                '(⊙_⊙;)',
+                '(???)',
+                '(?_?)',
+                '(???)',
+                '(?ω?)',
+                '(°▽°)/',
+                '(╯°□°）╯︵┻━┻',
+                '(^_^メ)',
+                '(*^.^*)',
+                '(；一_一)',
+                '(>_<)',
+                '<(\'.\'<)',
+                '(^.^)',
+                '(?????)',
+                'ヽ(???)ノ',
+                '(≧?≦)',
+                '(?? ω ?`)',
+                '?????',
+                '(?.?)',
+                '(*??`*)',
+                '?(^???^)?'
+            ];
+
+            // ---------- 动态组合零件 ----------
+            const LEFT_CHEEKS = ['', '', '?', '〃', '?', '?', '*', '。', ' '];
+            const RIGHT_CHEEKS = ['', '', '?', '〃', '?', '?', '*', '。', ' '];
+            const EYES = [
+                '^', '?', '`', '?', '?', '゜', '?', '?', '?', '⊙', '●', '?',
+                '≧', '>', '<', '?', '?', '?', '?', '?', '?', '?', '?', '?',
+                '??', '??', '?', '?', '??'
+            ];
+            const NOSES = [
+                '', '', '', '',
+                '?', '`', '?', '?', '?', '.', '?', '?', '?', ' ', '?'
+            ];
+            const MOUTHS = [
+                '_', '-', '?', '?', 'ω', '?', '▽', '△', '?', 'ヮ', '?',
+                '﹏', '?', '?', 'ヘ', '︶', '?', '?', '〃', '?', '?',
+                '⌒', '︿', '﹏', '?', '?', '?'
+            ];
+            const SUFFIXES = [
+                '', '', '',
+                'ノ', 'ミ', 'b', 'd', '?', '?', '彡', '。', '！', '?', '/', '?',
+                '?', '?', 'ゞ', '?'
+            ];
+
+            // 安全随机函数
+            const getRandom = (arr) => (arr && arr.length) ? arr[Math.floor(Math.random() * arr.length)] : '';
+
+            // 核心生成函数
+            function generateRandomKaomoji() {
+                // 30% 几率使用预设
+                if (Math.random() < 0.3) {
+                    return getRandom(PRESETS);
+                }
+
+                const leftCheek = getRandom(LEFT_CHEEKS);
+                const leftEye = getRandom(EYES);
+                const nose = getRandom(NOSES);
+                const mouth = getRandom(MOUTHS);
+                const rightEye = getRandom(EYES);
+                const rightCheek = getRandom(RIGHT_CHEEKS);
+                const suffix = getRandom(SUFFIXES);
+
+                let faceContent = leftCheek + leftEye + nose + mouth + rightEye + rightCheek;
+                const useSpaces = Math.random() < 0.4;
+                const kaomoji = useSpaces
+                    ? '( ' + faceContent + ' )' + suffix
+                    : '(' + faceContent + ')' + suffix;
+
+                // 保底：若脸内容为空且无后缀，返回一个可爱预设
+                if (faceContent.trim() === '' && suffix === '') {
+                    return '(???)';
+                }
+                return kaomoji;
+            }
+
+            // ---------- 等待 DOM 加载完成 ----------
+            document.addEventListener('DOMContentLoaded', function() {
+                const displayEl = document.getElementById('kaomojiDisplay');
+                const generateBtn = document.getElementById('generateBtn');
+                const copyBtn = document.getElementById('copyBtn');
+
+                if (!displayEl || !generateBtn || !copyBtn) return; // 预防性检查
+
+                // 初始显示
+                displayEl.textContent = generateRandomKaomoji();
+
+                // 生成事件
+                generateBtn.addEventListener('click', function() {
+                    displayEl.textContent = generateRandomKaomoji();
+                });
+
+                // 复制事件 (仅使用现代 clipboard API)
+                copyBtn.addEventListener('click', function() {
+                    const text = displayEl.textContent;
+                    if (!text) return;
+
+                    if (navigator.clipboard && navigator.clipboard.writeText) {
+                        navigator.clipboard.writeText(text)
+                            .then(() => {
+                                const originalText = copyBtn.textContent;
+                                copyBtn.textContent = '? 已复制';
+                                setTimeout(() => {
+                                    copyBtn.textContent = originalText;
+                                }, 200);
+                            })
+                            .catch(() => {
+                                alert('复制失败，请手动选中文字复制');
+                            });
+                    } else {
+                        // 极少数不支持 clipboard 的旧浏览器
+                        alert('您的浏览器不支持自动复制，请手动选中复制');
+                    }
+                });
+            });
+        })();
+    </script>
+</body>
+</html>
